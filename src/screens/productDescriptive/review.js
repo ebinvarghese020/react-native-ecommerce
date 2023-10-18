@@ -5,9 +5,11 @@ import React, {useState} from 'react';
 import { View, Text, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import colors from '../../components/common/colors';
+import { useNavigation } from '@react-navigation/native';
 
-const Review = (props) => {
+const Review = () => {
     const [press, setPress] = useState(false);
+    const navigation = useNavigation();
     const handlePress = () => {
         setPress(!press);
     };
@@ -28,6 +30,9 @@ const Review = (props) => {
         return stars;
       };
       const productRating = 3;
+    const handleComment = () => {
+        navigation.navigate('Comment');
+    }
     return (
         <View style={{ marginTop: 25}}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -37,12 +42,14 @@ const Review = (props) => {
                         fontSize: 20,}}>
                     Product Review
                 </Text>
-                <Text style={{
-                        color: colors.primary_green,
-                        fontFamily: 'Lato-Bold',
-                        fontSize: 16,}}>
-                            See All
-                </Text>
+                <TouchableOpacity onPress={handleComment}>
+                    <Text style={{
+                            color: colors.primary_green,
+                            fontFamily: 'Lato-Bold',
+                            fontSize: 16,}}>
+                                See All
+                    </Text>
+                </TouchableOpacity>
             </View>
             <View style={{backgroundColor: '#d3d3d3', borderRadius: 15, padding: 10, marginTop:10}}>
             <View style={{flexDirection: 'row'}}>
@@ -53,7 +60,7 @@ const Review = (props) => {
                     fontFamily: 'Lato-Bold',
                     fontSize: 14,
                     alignSelf: 'center',
-                }}>{props.name}</Text>
+                }}>Philip P Fernandus</Text>
                 <View style={{flexDirection: 'row'}}>
                     {renderStars(productRating)}
                 </View>
@@ -65,7 +72,7 @@ const Review = (props) => {
                 fontFamily: 'Lato-Regular',
                 fontSize: 12,
                 padding: 5,
-            }}>{props.body} </Text>
+            }}>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s.            </Text>
         </View>
         </View>
     );

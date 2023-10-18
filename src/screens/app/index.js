@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from 'react-native-vector-icons';
 
 import Login from '../Login';
 import Signup from '../Signup';
@@ -31,6 +32,7 @@ import AppSplash from '../splash';
 import ProductsView from '../products';
 import colors from '../../components/common/colors';
 import Descriptive from '../productDescriptive';
+import Comments, { HeaderRight } from '../productDescriptive/comment';
 
 const Drawer = createDrawerNavigator();
 
@@ -56,6 +58,11 @@ const AppDrawer = (props) => {
       <Drawer.Screen name="Wishlist" component={Wishlist} />
       <Drawer.Screen name="Account" component={Account} />
       <Drawer.Screen name="Descriptive" component={Descriptive}/>
+      <Drawer.Screen name="Comment" component={Comments} options={{headerRight: () =>(
+        <TouchableOpacity>
+          <Text style={{fontSize: 30, fontFamily: 'Lato-Bold', color: colors.black, marginRight: 20}}>+</Text>
+    </TouchableOpacity>
+      )}}/>
     </Drawer.Navigator>
   );
 };
