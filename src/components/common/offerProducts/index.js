@@ -1,49 +1,40 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import {  Text, View, Image, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {  Text, View, Image, FlatList, TouchableOpacity } from 'react-native';
 import  style  from './style';
 import CommonSectionHeader from '../commonSectionHeader';
 import { useNavigation } from '@react-navigation/native';
+import firestore from '@react-native-firebase/firestore';
+import { err } from 'react-native-svg/lib/typescript/xml';
+
 
 const OfferProducts = () => {
     const navigation = useNavigation();
-    const products = [
-        {
-        id: 0,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../../assets/images/email.png'),
-        },
-        {
-        id: 1,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../../assets/images/email.png'),
-        },
-        {
-        id: 2,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../../assets/images/email.png'),
-        },
-        {
-        id: 3,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../../assets/images/email.png'),
-        },
-        {
-        id: 4,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../../assets/images/email.png'),
-        },
-    ];
+    const [products, setProducts] = useState([]);
+    const [qty, setQty] = useState(0);
+    useEffect(() => {
+        getProducts();
+    }, []);
+    
+    const getProducts = async () => {
+        await firestore()
+                .collection('Products')
+                .get()
+                .then(snapshot => {
+                    if ( !snapshot.empty ){
+                        const results = [];
+                        snapshot.docs.forEach(doc => {
+                        if (doc.exists) {
+                            results.push(doc.data());
+                        }
+                    });
+                    setProducts(results);
+                    }
+                })
+                .catch( errors => {
+                    console.warn(errors);
+                });
+    };
     const handleNavigate = () => {
         navigation.navigate('ProductsView');
     };
@@ -65,24 +56,28 @@ const OfferProducts = () => {
                     <View
                         style={style.productView}>
                         <Image
-                        source= {item.image}
+                        source= {{uri : item.image}}
                         style={style.productImage} />
                         <View style={style.nameView}>
                         <Text style={style.texts}>{item.name}</Text>
-                        <Text style={style.textsOne} numberOfLines={2}> {item.content}</Text>
+                        <Text style={style.textsOne} numberOfLines={2}> {item.description}</Text>
 
-                        <View style={style.des}>
+                        <View >
                             <View style={style.des}>
 
-                                <Text style={style.texts}>{item.price}</Text>
+                                    <Text style={style.texts}>{item.price} Rs</Text>
                                 <View style={style.offer}>
-                                <Text style={style.offerText}>{item.price}%</Text>
+                                    <Text style={style.offerText}>10%</Text>
+                                </View>
                             </View>
-                        </View>
                         <View style={style.qunView}>
-                            <Text style={style.qunText1}>-</Text>
-                            <Text style={style.qunText2}>0</Text>
-                            <Text style={style.qunText1}>+</Text>
+                            <TouchableOpacity onPress={() => setQty(qty > 0 ? qty - 1 : 0)}>
+                            <Text style={style.qunText1} >-</Text>
+                            </TouchableOpacity>
+                            <Text style={style.qunText2}>{qty}</Text>
+                            <TouchableOpacity onPress={() => setQty(qty + 1)}>
+                            <Text style={style.qunText1} >+</Text>
+                            </TouchableOpacity>
                         </View>
                         </View>
                         </View>

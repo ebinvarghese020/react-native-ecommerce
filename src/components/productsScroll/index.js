@@ -10,6 +10,7 @@ import firestore from '@react-native-firebase/firestore';
 import productsView from '../../screens/products/index';
 import ProductsView from '../../screens/products/index';
 import { useNavigation } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
 
 const ProductScroll = () => {
@@ -18,6 +19,7 @@ const ProductScroll = () => {
         getProducts();
     }, []);
     const navigation = useNavigation();
+    const {userId} = useSelector(state => state);
 
     const getProducts = async () => {
         await firestore().collection('Products').get()
@@ -26,7 +28,8 @@ const ProductScroll = () => {
                 const result = [];
                 snapshot.docs.forEach(doc => {
                     if (doc.exists){
-                        result.push(doc.data());
+                        const responseData = {id: doc.id,...doc?.data()};
+                        result.push(responseData);
                     }
                 });
                 setProducts(result);
@@ -39,6 +42,37 @@ const ProductScroll = () => {
 
     const handleView = () => {
         navigation.navigate('Descriptive');
+    }
+    const AddToCart = async item => {
+        console.warn(item);
+        await firestore()
+              .collection('Cart')
+              .where('userId', '==', userId)
+              .where('productId', '==', item.id)
+              .get()
+              .then(snapshot => {
+                if (snapshot.empty){
+                    firestore()
+                    .collection('Cart')
+                    .add({
+                        created: Date.now(),
+                        description: item.description,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1,
+                        userId: userId,
+                        productId: item.id,
+                        image: item.image,
+                    });
+                } else {
+                    firestore()
+                    .collection('Cart')
+                    .doc(snapshot?.docs[0].id)
+                    .update({
+                        quantity: parseInt(snapshot?.docs[0].data().quantity, 10) + 1,
+                    });
+                }
+              })
     }
     return (
         <View style={style.container}>
@@ -78,7 +112,9 @@ const ProductScroll = () => {
                                 <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
                                     <Text style={{ fontFamily: 'Lato-Bold', fontSize: 14, color: colors.black}}>{item.price}</Text>
                                     <View style={{padding:5, backgroundColor: colors.primary_green, borderRadius:5, margin:10}}>
-                                        <Text style={{fontFamily:'Lato-Bold',fontSize: 20, color: colors.white}}>+</Text>
+                                        <Text 
+                                        style={{fontFamily:'Lato-Bold',fontSize: 28, color: colors.white}}
+                                        onPress={() => AddToCart(item)}>+</Text>
                                     </View>
                                 </View>
                             </View>

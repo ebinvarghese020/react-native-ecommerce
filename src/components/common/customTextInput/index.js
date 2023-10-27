@@ -6,7 +6,7 @@ import colors from '../colors';
 
 const CustomTextInput = props => {
     const [show, setShow] = useState(false);
-    const {placeholder ,type, handleText, value} = props;
+    const {placeholder ,type, handleText, value, multiline} = props;
     const keyboardType = type === 'email' ? 'email-address' : type === 'phone' ? 'phone-pad' : 'default';
     const secureText = type === 'password' ? (show ? false : true) : false;
     const icon = type === 'email'
@@ -26,10 +26,11 @@ const CustomTextInput = props => {
             keyboardType={keyboardType}
             placeholderTextColor="grey"
             secureTextEntry={secureText}
-            style={style.textEntry}
+            style={[style.textEntry, multiline ? style.multilineTextEntry : null]}
             selectionColor={colors.primary_green}
             onChangeText={handleText}
             value={value}
+            multiline={multiline ? multiline : null}
         />
         { icon ? (
         <TouchableOpacity onPress={handlePassword} disabled={type !== 'password' ? true : false }>

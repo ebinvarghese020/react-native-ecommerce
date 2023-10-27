@@ -6,40 +6,25 @@ import { View, Text, Image } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import colors from '../../components/common/colors';
 import { useNavigation } from '@react-navigation/native';
+import StarRating from 'react-native-star-rating-widget';
+
 
 const Review = () => {
     const [press, setPress] = useState(false);
     const navigation = useNavigation();
-    const handlePress = () => {
-        setPress(!press);
-    };
-    const renderStars = (rating) => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-          stars.push(
-            <Image
-              key={i}
-              source={i <= rating ? require('../../assets/images/starFill.png') : require('../../assets/images/star.png')}
-              style={{
-                height: 15,
-                width: 15,
-            }}
-            />
-          );
-        }
-        return stars;
-      };
-      const productRating = 3;
+    const [productRating, setRating] = useState(3);
+    
     const handleComment = () => {
         navigation.navigate('Comment');
     }
     return (
-        <View style={{ marginTop: 25}}>
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={{ marginTop: 25, marginVertical: 20}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginVertical: 20}}>
                 <Text style={{
                         color: colors.black,
                         fontFamily: 'Lato-Bold',
-                        fontSize: 20,}}>
+                        fontSize: 20
+                        }}>
                     Product Review
                 </Text>
                 <TouchableOpacity onPress={handleComment}>
@@ -61,9 +46,7 @@ const Review = () => {
                     fontSize: 14,
                     alignSelf: 'center',
                 }}>Philip P Fernandus</Text>
-                <View style={{flexDirection: 'row'}}>
-                    {renderStars(productRating)}
-                </View>
+                <StarRating starSize={28} rating={productRating} onChange={()=> {}}/>
             </View>
             </View>
             <Text style={{

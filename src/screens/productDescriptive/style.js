@@ -67,11 +67,15 @@ const style = StyleSheet.create({
     boxp: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        marginVertical: 10,
     },
     ptext: {
+        fontFamily: 'Lato-Regular',
+        fontSize: 16,
         margin: 10,
-        backgroundColor: colors.grey,
+        backgroundColor: colors.LIGHT_GREY,
         padding: 10,
+        color: colors.black,
     },
     scroll: {
         flex: 1,

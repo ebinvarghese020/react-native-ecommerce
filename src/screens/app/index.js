@@ -37,11 +37,12 @@ import Comments, { HeaderRight } from '../productDescriptive/comment';
 const Drawer = createDrawerNavigator();
 
 const AppDrawer = (props) => {
+  const navigation = useNavigation();
   return (
     <Drawer.Navigator
       // screenOptions={{ headerShown: false }}
       initialRouteName="MyFooter"
-      drawerContent={(props) => <CustomDrawer {...props}/>}
+      drawerContent={(props) => <CustomDrawer {...props} />}
       screenOptions={{
         // headerLeft: () =>  <CommonHeaderLeft />,
         headerTitleAlign: 'left',
@@ -58,11 +59,7 @@ const AppDrawer = (props) => {
       <Drawer.Screen name="Wishlist" component={Wishlist} />
       <Drawer.Screen name="Account" component={Account} />
       <Drawer.Screen name="Descriptive" component={Descriptive}/>
-      <Drawer.Screen name="Comment" component={Comments} options={{headerRight: () =>(
-        <TouchableOpacity>
-          <Text style={{fontSize: 30, fontFamily: 'Lato-Bold', color: colors.black, marginRight: 20}}>+</Text>
-    </TouchableOpacity>
-      )}}/>
+      <Drawer.Screen name="Comment" component={Comments}/>
     </Drawer.Navigator>
   );
 };

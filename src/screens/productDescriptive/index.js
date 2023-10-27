@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import React from 'react';
+import React,{useEffect, useState} from 'react';
 import { View, Text, Image } from 'react-native';
 import style from './style';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
@@ -8,33 +8,31 @@ import Define from './prod';
 import Review from './review';
 import Footer, { AddToCart } from './prodFooter';
 import ProductScroll from '../../components/productsScroll';
+import StarRating from 'react-native-star-rating-widget';
+import { useNavigation } from '@react-navigation/native';
+import CommonRightHeader from '../../components/common/commonHeader';
+
 
 const Descriptive = () => {
-    const renderStars = (rating) => {
-        const stars = [];
-        for (let i = 1; i <= 5; i++) {
-          stars.push(
-            <Image
-              key={i}
-              source={i <= rating ? require('../../assets/images/starFill.png') : require('../../assets/images/star.png')}
-              style={style.star}
-            />
-          );
-        }
-        return stars;
-      };
-      const productRating = 3;
+      const navigation = useNavigation();
+      const [productRating, setRating] = useState(3);
+      useEffect(() => {
+        navigation.setOptions({
+          headerRight: () => <CommonRightHeader cart={true} share={true}/>,
+          title: '',
+        })
+      })
     return (
         <View style={style.container}>
+                      <ScrollView Style={{flex:1}}>
             <View style={style.center}>
                 <Image source={{uri: 'https://toppng.com/uploads/preview/how-to-set-use-red-white-heart-icon-png-love-heart-11563411236sl0ynpmn4w.png'}} style={{width: 25, height: 25, resizeMode:'contain', alignSelf:'flex-end', marginRight:  20, marginTop: 20}} />
                 <Image source={require('../../assets/images/google.png')} style={style.image} />
             </View>
-            <ScrollView Style={{flex:1}}>
             <View style={style.box}>
                         <Text style={style.mainHeading}>Lemon</Text>
                         <View style={style.ratingContainer}>
-                        {renderStars(productRating)}
+                        <StarRating starSize={28} rating={productRating} onChange={()=> {}}/>
                         <Text style={style.ratingText}>(1 Rating)</Text>
                         </View>
                         <View style={style.priceContainer}>
@@ -43,7 +41,7 @@ const Descriptive = () => {
                          </View>
                         <TouchableOpacity>
                             <View style={style.boxp}>
-                                <Text style={style.ptext}>500g/24.00Rs ^</Text>
+                                <Text style={style.ptext}>500g/24.00Rs   \/</Text>
                                 <Text style={style.ptext}>Delivery Time</Text>
                             </View>
                         </TouchableOpacity>
@@ -55,8 +53,8 @@ const Descriptive = () => {
                        <Footer/>
                 </View>
                 <ProductScroll />
-                <AddToCart />
                 </ScrollView>
+                <AddToCart />
         </View>
     );
 };

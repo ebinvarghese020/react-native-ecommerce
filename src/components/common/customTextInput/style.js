@@ -15,10 +15,10 @@ const style = StyleSheet.create({
         width:width * 0.8,
         height: height * 0.05,
     },
+    multilineTextEntry: {
+        height: height * 0.1,
+    },
     container:{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
         backgroundColor: colors.secondary_green,
         padding: width * 0.02,
         borderRadius: 10,

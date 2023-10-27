@@ -22,7 +22,8 @@ const style = StyleSheet.create({
     },
     productImage: {width: 75, height: 75, resizeMode: 'contain', alignSelf: 'center', margin: 10},
     nameView: {borderLeftWidth:1, padding: 15, borderColor: colors.black},
-    des: {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 15,},
+    des: {flexDirection: 'row', alignItems: 'center',  marginTop: 15,justifyContent: 'space-between',},
+    desu: {flexDirection: 'row', justifyContent: 'space-between'},
     texts: { fontFamily: 'Lato-Bold', fontSize: 18, color: colors.black},
     textsOne: { fontFamily: 'Lato-Regular', fontSize: 14, color: colors.black},
     offer: {

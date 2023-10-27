@@ -51,7 +51,6 @@ const ProductsView = () => {
                 </View>
             <CustomSearch text={'Filter'} />
             <OfferProducts/>
-            <Text>Hai</Text>
         </View>
     );
 };
