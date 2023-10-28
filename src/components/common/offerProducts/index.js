@@ -5,17 +5,17 @@ import  style  from './style';
 import CommonSectionHeader from '../commonSectionHeader';
 import { useNavigation } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
-import { err } from 'react-native-svg/lib/typescript/xml';
+import { useSelector } from 'react-redux';
 
 
 const OfferProducts = () => {
     const navigation = useNavigation();
     const [products, setProducts] = useState([]);
-    const [qty, setQty] = useState(0);
+
     useEffect(() => {
         getProducts();
     }, []);
-    
+
     const getProducts = async () => {
         await firestore()
                 .collection('Products')
@@ -24,9 +24,10 @@ const OfferProducts = () => {
                     if ( !snapshot.empty ){
                         const results = [];
                         snapshot.docs.forEach(doc => {
-                        if (doc.exists) {
-                            results.push(doc.data());
-                        }
+                            if (doc.exists){
+                                const responseData = {id: doc.id,...doc?.data()};
+                                results.push(responseData);
+                            }
                     });
                     setProducts(results);
                     }
@@ -38,6 +39,7 @@ const OfferProducts = () => {
     const handleNavigate = () => {
         navigation.navigate('ProductsView');
     };
+
     return (
         <View style={style.container}>
             <CommonSectionHeader
@@ -51,43 +53,82 @@ const OfferProducts = () => {
                     data={products}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => String(index)}
-                    renderItem={({item, index}) => {
-                    return (
-                    <View
-                        style={style.productView}>
-                        <Image
-                        source= {{uri : item.image}}
-                        style={style.productImage} />
-                        <View style={style.nameView}>
-                        <Text style={style.texts}>{item.name}</Text>
-                        <Text style={style.textsOne} numberOfLines={2}> {item.description}</Text>
-
-                        <View >
-                            <View style={style.des}>
-
-                                    <Text style={style.texts}>{item.price} Rs</Text>
-                                <View style={style.offer}>
-                                    <Text style={style.offerText}>10%</Text>
-                                </View>
-                            </View>
-                        <View style={style.qunView}>
-                            <TouchableOpacity onPress={() => setQty(qty > 0 ? qty - 1 : 0)}>
-                            <Text style={style.qunText1} >-</Text>
-                            </TouchableOpacity>
-                            <Text style={style.qunText2}>{qty}</Text>
-                            <TouchableOpacity onPress={() => setQty(qty + 1)}>
-                            <Text style={style.qunText1} >+</Text>
-                            </TouchableOpacity>
-                        </View>
-                        </View>
-                        </View>
-                    </View>
-                    );
-                    }}
+                    renderItem={({item, index}) => (
+                    <RenderItem item={item} index={index} />
+    )}
                 />
             </View>
         </View>
     );
 };
+
+const RenderItem = ({item, index}) => {
+    const [qty, setQty] = useState(0);
+    const {userId} = useSelector(state => state);
+    const AddToCart = async item => {
+        await firestore()
+              .collection('Cart')
+              .where('userId', '==', userId)
+              .where('productId', '==', item.id)
+              .get()
+              .then(snapshot => {
+                if (snapshot.empty){
+                    firestore()
+                    .collection('Cart')
+                    .add({
+                        created: Date.now(),
+                        description: item.description,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1,
+                        userId: userId,
+                        productId: item.id,
+                        image: item.image,
+                    });
+                } else {
+                    firestore()
+                    .collection('Cart')
+                    .doc(snapshot?.docs[0].id)
+                    .update({
+                        quantity: parseInt(snapshot?.docs[0].data().quantity, 10) + 1,
+                    });
+                }
+              })
+    }
+    return (
+        <TouchableOpacity>
+        <View
+            style={style.productView}>
+            <Image
+            source= {{uri : item.image}}
+            style={style.productImage} />
+            <View style={style.nameView}>
+            <Text style={style.texts}>{item.name}</Text>
+            <Text style={style.textsOne} numberOfLines={2}> {item.description}</Text>
+
+            <View >
+                <View style={style.des}>
+
+                        <Text style={style.texts}>{item.price} Rs</Text>
+                    <View style={style.offer}>
+                        <Text style={style.offerText}>10%</Text>
+                    </View>
+                </View>
+            <View style={style.qunView}>
+                <TouchableOpacity onPress={() => setQty(qty > 0 ? qty - 1 : 0)}>
+                <Text style={style.qunText1} >-</Text>
+                </TouchableOpacity>
+                <Text style={style.qunText2}>{qty}</Text>
+                <TouchableOpacity onPress={() => {setQty(qty + 1)
+                                                    AddToCart(item)}}>
+                <Text style={style.qunText1} >+</Text>
+                </TouchableOpacity>
+            </View>
+            </View>
+            </View>
+        </View>
+        </TouchableOpacity>
+        );
+}
 
 export default OfferProducts;

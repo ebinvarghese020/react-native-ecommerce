@@ -1,57 +1,58 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-native/no-inline-styles */
 
-import React from 'react';
-import { View, Text, FlatList, Image } from 'react-native';
+import React, {useState, useCallback} from 'react';
+import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
 import  style  from './style';
 import CommonButton from '../../components/common/commonButtons';
+import firestore from '@react-native-firebase/firestore';
+import { useSelector } from 'react-redux';
+import { ScrollView } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const Cart = () => {
-    const products = [
-        {
-        id: 0,
-        name: 'Lemon',
-        content: 'Fresh lemons direct from farm',
-        price: 10,
-        image: require('../../assets/images/hide.png'),
-        },
-    ];
+    const [products, setProducts] = useState([]);
+    const {userId} = useSelector(state => state);
+    
+    const GetCart = async () => {
+        try {
+            const snapshot = await firestore()
+                .collection('Cart')
+                .get();
+
+            if (!snapshot.empty) {
+                const results = [];
+                snapshot.docs.forEach(doc => {
+                    if (doc.exists) {
+                        const responseData = { id: doc.id, ...doc?.data() };
+                        results.push(responseData);
+                    }
+                });
+                setProducts(results);
+            }
+        } catch (error) {
+            console.warn(error);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            GetCart()
+        }, [])
+    );
+
     return (
         <View style={style.container}>
+            <ScrollView>
             <View style={style.one}>
                 <FlatList
                     data={products}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => String(index)}
-                    renderItem={({item, index}) => {
-                    return (
-                    <View
-                        style={style.productView}>
-                        <Image
-                        source= {item.image}
-                        style={style.productImage} />
-                        <View style={style.nameView}>
-                        <Text style={style.texts}>{item.name}</Text>
-                        <Text style={style.textsOne} numberOfLines={2}> {item.content}</Text>
-
-                        <View style={style.des}>
-                            <View style={style.des}>
-
-                                <Text style={style.texts}>{item.price}</Text>
-                                <View style={style.offer}>
-                                <Text style={style.offerText}>{item.price}%</Text>
-                            </View>
-                        </View>
-                        <View style={style.qunView}>
-                            <Text style={style.qunText1}>-</Text>
-                            <Text style={style.qunText2}>0</Text>
-                            <Text style={style.qunText1}>+</Text>
-                        </View>
-                        </View>
-                        </View>
-                    </View>
-                    );
-                    }}
+                    renderItem={({item, index}) => (
+                    <RenderItem item={item} index={index} />
+                    )}
                 />
                 <View style={style.offerOne}>
                     <View style={style.OfferLeft}>
@@ -94,9 +95,79 @@ const Cart = () => {
 
                 < CommonButton text={'Proceed To Checkout'}/>
 
-            </View>
+                </View>
+            </ScrollView>
         </View>
     );
 };
+
+const RenderItem = ({item, index}) => {
+    const [qty, setQty] = useState(0);
+    const {userId} = useSelector(state => state);
+    const AddToCart = async item => {
+        await firestore()
+              .collection('Cart')
+              .where('userId', '==', userId)
+              .where('productId', '==', item.id)
+              .get()
+              .then(snapshot => {
+                console.log(snapshot.docs());
+                console.log(userId, item.id);
+                if (snapshot.empty){
+                    firestore()
+                    .collection('Cart')
+                    .add({
+                        created: Date.now(),
+                        description: item.description,
+                        name: item.name,
+                        price: item.price,
+                        quantity: 1,
+                        userId: userId,
+                        productId: item.id,
+                        image: item.image,
+                    });
+                } else {
+                    firestore()
+                    .collection('Cart')
+                    .doc(snapshot?.docs[0].id)
+                    .update({
+                        quantity: parseInt(snapshot?.docs[0].data().quantity, 10) + 1,
+                    });
+                }
+              });
+    };
+    return (
+        <View
+            style={style.productView}>
+            <Image
+            source= {{uri : item.image}}
+            style={style.productImage} />
+            <View style={style.nameView}>
+            <Text style={style.texts}>{item.name}</Text>
+            <Text style={style.textsOne}> {item.description}</Text>
+            <View style={style.des}>
+                <View style={style.des}>
+
+                    <Text style={style.texts}>Rs. {item.price}</Text>
+                    <View style={style.offer}>
+                    <Text style={style.offerText}>{item.price}%</Text>
+                </View>
+            </View>
+            <View style={style.qunView}>
+                <TouchableOpacity onPress={() => setQty(qty > 0 ? qty - 1 : 0)}>
+                    <Text style={style.qunText1} >-</Text>
+                </TouchableOpacity>
+                    <Text style={style.qunText2}>{qty}</Text>
+
+                <TouchableOpacity onPress={() => {setQty(qty + 1)
+                                                        AddToCart(item)}}>
+                    <Text style={style.qunText1}>+</Text>
+                </TouchableOpacity>
+            </View>
+            </View>
+            </View>
+        </View>
+        );
+}
 
 export default Cart;
