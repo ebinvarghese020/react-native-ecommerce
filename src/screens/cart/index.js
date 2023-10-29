@@ -51,7 +51,7 @@ const Cart = () => {
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item, index) => String(index)}
                     renderItem={({item, index}) => (
-                    <RenderItem item={item} index={index} />
+                    <RenderItem item={item} index={index} callReload={GetCart}/>
                     )}
                 />
                 <View style={style.offerOne}>
@@ -101,9 +101,10 @@ const Cart = () => {
     );
 };
 
-const RenderItem = ({item, index}) => {
+const RenderItem = ({item, index, callReload}) => {
     const [qty, setQty] = useState(0);
     const {userId} = useSelector(state => state);
+    console.warn(item)
     const AddToCart = async item => {
         await firestore()
               .collection('Cart')
@@ -111,8 +112,6 @@ const RenderItem = ({item, index}) => {
               .where('productId', '==', item.id)
               .get()
               .then(snapshot => {
-                console.log(snapshot.docs());
-                console.log(userId, item.id);
                 if (snapshot.empty){
                     firestore()
                     .collection('Cart')
@@ -136,6 +135,17 @@ const RenderItem = ({item, index}) => {
                 }
               });
     };
+    const removeItem = async () => {
+        if (qty <= 1) {
+            await firestore().collection('Cart').doc(item.id).delete().then(() => {callReload})
+        }
+        else {
+            setQty(qty - 1);
+            firestore().collection('Cart').doc(item.id).update({
+                quantity: parseInt(item.quantity, 10) - 1,
+            })
+        }
+    }
     return (
         <View
             style={style.productView}>
@@ -154,7 +164,7 @@ const RenderItem = ({item, index}) => {
                 </View>
             </View>
             <View style={style.qunView}>
-                <TouchableOpacity onPress={() => setQty(qty > 0 ? qty - 1 : 0)}>
+                <TouchableOpacity onPress={removeItem}>
                     <Text style={style.qunText1} >-</Text>
                 </TouchableOpacity>
                     <Text style={style.qunText2}>{qty}</Text>
